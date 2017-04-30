@@ -77,9 +77,8 @@ public class Function
 			String err_msg = driver.findElement(By.cssSelector("div.redbg")).getText();
 			System.out.println("Exception Occured While Generating Statement For A/c no:"+accno+"--\n"+err_msg);	
 			Assert.assertTrue(false);			
-		}
-		
-		
+		}	
+		//driver.findElement(By.id("HREF_Logout")).click();
 	}
 	
 }

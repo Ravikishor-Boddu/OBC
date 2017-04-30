@@ -8,14 +8,18 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -31,7 +35,7 @@ public class OBCTrans
 	
 	
 	
-	@BeforeMethod
+	@BeforeClass
 	public void setUp()
 	{
 	    HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
@@ -53,19 +57,27 @@ public class OBCTrans
 	    cap.setCapability(ChromeOptions.CAPABILITY, options);
 		System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir")+"\\drivers\\chromedriver.exe");
 		driver = new ChromeDriver(cap);
+		//driver = new HtmlUnitDriver();
 		driver.manage().window().maximize();
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 		driver.manage().timeouts().pageLoadTimeout(120, TimeUnit.SECONDS);
 		driver.get("https://www.obconline.co.in");
+		Function.login(CORPID, USERID, PASSWORD, driver);
 	}
 	
-	
-	@Test(dataProvider="Account_details")
-	public void runOBC(String accno, String frm_dt, String to_dt) throws Exception //
+/*	@Test
+	public void login()
 	{
 		Function.login(CORPID, USERID, PASSWORD, driver);
+	}
+	*/
+	@Test(dataProvider="Account_details")//(dependsOnMethods="login")//
+	public void runOBC(String accno, String frm_dt, String to_dt) throws Exception //
+	{
+		//Function.login(CORPID, USERID, PASSWORD, driver);
 		try {
 			Function.generateStatement(accno, frm_dt, to_dt, driver);
+			//Function.generateStatement("12025015000455", "8/3/2017", "8/3/2017", driver);
 			Thread.sleep(2000);
 		} catch (Exception e) {
 			File screen_shot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
@@ -98,9 +110,10 @@ public class OBCTrans
 		return obj;
 	}
 	
-	@AfterMethod
+	@AfterClass
 	public void clear()
 	{
+		driver.findElement(By.id("HREF_Logout")).click();
 		driver.close();
 	}
 	
